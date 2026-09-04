@@ -1,4 +1,4 @@
-## RaceDay
+# RaceDay
 
 RaceDay is a system that manages road running, walking, and cycling events all across South Africa. Anyone that feels that they want to take part in the event can sign up and be in the next race.
 
