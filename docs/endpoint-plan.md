@@ -8,3 +8,5 @@
 | PUT | /api/profile | Updates the logged-in user's own profile details | Any (logged in) | {name, email} | 200 OK - updated profile details; 400 Bad Request - invalid or missing fields |
 | POST | /api/events | Create a new events | Organiser | {name, description, date, location, distance, eventType} | 201 Created - event created; 403 Forbidden - only Organisers are allowed |
 | GET | /api/events | List all events | Any (logged in) | None | 200 OK - array of events; 401 Unauthorized - no valid session|
+| PUT | /api/events/{id} | Update an existing event | Organiser | {name, description, date, location, distance, eventType} | 200 OK - updated event; 404 Not Found - event doesn't exist; 403 Forbidden - only Organisers are allowed |
+| DELETE | /api/events/{id} | Removes an event | Organiser | None | 200 OK - confirmation; 404 Not Found - event doesn't exist; 403 Forbidden - only Organisers can delete event |
