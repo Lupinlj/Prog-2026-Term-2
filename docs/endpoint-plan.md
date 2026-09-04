@@ -15,4 +15,5 @@
 | POST | /api/events/{eventId}/enrolments | Select a category to enrol in the event | Participant | {categoryId} | 201 Created - enrolment record; 400 Bad Request - invalid category |
 | GET | /api/enrolments/mine | Returns a participant's enrolment history | Participant | None | 200 OK - array of enrolments; 401 Unauthorized - no valid session |
 | GET | /api/events/{eventId}/enrolments | Organiser views all enrolments for one of their events | Organiser | None | 200 OK - array of enrolments; 403 Forbidden - only Organisers allowed | 
-
+| POST | /api/enrolments/{enrolmentId}/result | Organiser captures results for finish time and position for a participant Organiser | {finishTime, position} | 201 Created - result recorded; 403 Forbidden - only Organisers are allowed |
+| GET | /api/results/mine | Shows participant's logged-in results | Participant | None | 200 OK - array of results; 401 Unauthorized - no valid session
