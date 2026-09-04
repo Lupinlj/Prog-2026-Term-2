@@ -10,5 +10,9 @@
 | GET | /api/events | List all events | Any (logged in) | None | 200 OK - array of events; 401 Unauthorized - no valid session|
 | PUT | /api/events/{id} | Update an existing event | Organiser | {name, description, date, location, distance, eventType} | 200 OK - updated event; 404 Not Found - event doesn't exist; 403 Forbidden - only Organisers are allowed |
 | DELETE | /api/events/{id} | Removes an event | Organiser | None | 200 OK - confirmation; 404 Not Found - event doesn't exist; 403 Forbidden - only Organisers can delete event |
-| POST | /api/events/{eventID}/categories | Organiser creates a new category for a specific event | Organiser | {categoryName} | 201 Created - new category; 403 Forbidden - only Organisers allowed |
-| GET | /api/events/{eventsId}/categories | List all categories for a specific event | Any (logged in | None | 200 OK - array of categories; 401 Unauthorized - no valid session |
+| POST | /api/events/{eventId}/categories | New event category gets added by Organiser | Organiser | {categoryName} | 201 Created - new category; 403 Forbidden - only Organisers allowed |
+| GET | /api/events/{eventId}/categories | List all categories for a specific event | Any (logged in) | None | 200 OK - array of categories; 401 Unauthorized - no valid session |
+| POST | /api/events/{eventId}/enrolments | Select a category to enrol in the event | Participant | {categoryId} | 201 Created - enrolment record; 400 Bad Request - invalid category |
+| GET | /api/enrolments/mine | Returns a participant's enrolment history | Participant | None | 200 OK - array of enrolments; 401 Unauthorized - no valid session |
+| GET | /api/events/{eventId}/enrolments | Organiser views all enrolments for one of their events | Organiser | None | 200 OK - array of enrolments; 403 Forbidden - only Organisers allowed | 
+
