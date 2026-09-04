@@ -1,0 +1,24 @@
+name: Validate Repository Structure
+
+on: [push]
+
+jobs:
+  check-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check docs folder exists
+        run: |
+          if [ ! -d "docs" ]; then
+            echo "docs folder is missing!"
+            exit 1
+          fi
+          echo "docs folder found."
+
+      - name: Check required files exist
+        run: |
+          test -f "docs/Prog POE ERD (png).drawio.png" && echo "ERD found" || (echo "ERD missing" && exit 1)
+          test -f "docs/endpoint-plan.md" && echo "Endpoint plan found" || (echo "Endpoint plan missing" && exit 1)
+          test -f "docs/RaceDay_Database.sql" && echo "SQL script found" || (echo "SQL script missing" && exit 1)
