@@ -32,7 +32,8 @@ namespace RaceDay.Migrations
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("EventId")
                         .HasColumnType("int");
@@ -75,6 +76,9 @@ namespace RaceDay.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventId"));
 
+                    b.Property<decimal>("Distance")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("EventDate")
                         .HasColumnType("datetime2");
 
@@ -87,6 +91,10 @@ namespace RaceDay.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EventName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EventType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -110,19 +118,25 @@ namespace RaceDay.Migrations
 
                     b.Property<string>("OrganiserEmail")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("OrganiserName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("OrganiserPassword")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.HasKey("OrganiserId");
 
-                    b.ToTable("Organiser");
+                    b.HasIndex("OrganiserEmail")
+                        .IsUnique();
+
+                    b.ToTable("Organisers");
                 });
 
             modelBuilder.Entity("RaceDay.Models.Participant", b =>
@@ -188,7 +202,7 @@ namespace RaceDay.Migrations
             modelBuilder.Entity("RaceDay.Models.Enrolment", b =>
                 {
                     b.HasOne("RaceDay.Models.Category", "Category")
-                        .WithMany()
+                        .WithMany("Enrolments")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -206,13 +220,13 @@ namespace RaceDay.Migrations
 
             modelBuilder.Entity("RaceDay.Models.Event", b =>
                 {
-                    b.HasOne("RaceDay.Models.Organiser", "Organiser")
-                        .WithMany()
+                    b.HasOne("RaceDay.Models.Organiser", "Organisers")
+                        .WithMany("Events")
                         .HasForeignKey("OrganiserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Organiser");
+                    b.Navigation("Organisers");
                 });
 
             modelBuilder.Entity("RaceDay.Models.Result", b =>
@@ -224,6 +238,16 @@ namespace RaceDay.Migrations
                         .IsRequired();
 
                     b.Navigation("Enrolment");
+                });
+
+            modelBuilder.Entity("RaceDay.Models.Category", b =>
+                {
+                    b.Navigation("Enrolments");
+                });
+
+            modelBuilder.Entity("RaceDay.Models.Organiser", b =>
+                {
+                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }

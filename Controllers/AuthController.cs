@@ -1,6 +1,7 @@
 ﻿using BCrypt.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RaceDay.Data;
 using RaceDay.DTO;
 using RaceDay.Models;
@@ -32,7 +33,7 @@ namespace RaceDay.Controllers
         public IActionResult Register(RegisterDto dto)
         {
 
-            // 1. Check input
+            //  Check input
             if (string.IsNullOrWhiteSpace(dto.Name) ||
                 string.IsNullOrWhiteSpace(dto.Email) ||
                 string.IsNullOrWhiteSpace(dto.Password))
@@ -40,17 +41,18 @@ namespace RaceDay.Controllers
                 return BadRequest("Name, email and password are required!.");
             }
 
-            // 2. 
+            // Check if email exists
+            bool emailTaken = _context.Organisers.Any(o => o.OrganiserEmail == dto.Email) 
+                || _context.Participants.Any(p => p.ParticipantEmail == dto.Email);
+
+            if (emailTaken)
+                return BadRequest("That email is already registerd");
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             
 
             if (dto.Role == "Organiser")
             { 
-                // This will check to see if the email isn't already registerd as an Organiser
-                if (_context.Organisers.Any(o => o.OrganiserEmail == dto.Email))
-                    return BadRequest("That email is already registered");
-
                 // The context the user will use
                 _context.Organisers.Add(new Organiser
                 {
@@ -63,11 +65,6 @@ namespace RaceDay.Controllers
 
             else if (dto.Role == "Participant")
             {
-                // This will check to see if the email isn't already registerd as an Participant
-                if (_context.Participants.Any(p => p.ParticipantEmail == dto.Email))
-                    return BadRequest("That email is already registered");
-
-
                 _context.Participants.Add(new Participant
                 {
                     ParticipantName = dto.Name,
@@ -82,7 +79,7 @@ namespace RaceDay.Controllers
             }
             // Write the new account to the database
             _context.SaveChanges();
-            return Ok();
+            return StatusCode(StatusCodes.Status201Created, "Registered");
         }
 
 
@@ -92,51 +89,32 @@ namespace RaceDay.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult Login(LoginDto dto)
         {
-            // Check the role to see if it's Organiser
-            if (dto.Role == "Organiser")
+            // First, check email to see if its Organiser
+            var organiser = _context.Organisers.FirstOrDefault(o => o.OrganiserEmail == dto.Email);
+            if (organiser != null)
             {
-                // Look up the Organiser using the email that was typed in
-                var organiser = _context.Organisers.FirstOrDefault(o => o.OrganiserEmail == dto.Email);
-               
-                // If there is no email, the user will get an error
-                if (organiser == null)
-                    return Unauthorized("Invalid email or password");
-
-                // Compare the typed password with the stored hash, user gets an error if it doesn't match
                 if (!BCrypt.Net.BCrypt.Verify(dto.Password, organiser.OrganiserPassword))
                     return Unauthorized("Invalid email or password");
 
-                // Log user in for Organiser
-                HttpContext.Session.SetInt32("UserId", organiser.OrganiserId);
-                HttpContext.Session.SetString("Role", "Organiser");
+                HttpContext.Session.SetInt32(SessionsKeyUserId, organiser.OrganiserId);
+                HttpContext.Session.SetString(SessionsKeyRole, "Organiser");
+                return Ok("Login Successfull");
             }
-           
 
-            // Check to see of the role is Participant
-            else if (dto.Role == "Participant")
+            // Check to see if its Participant
+            var participant = _context.Participants.FirstOrDefault(p => p.ParticipantEmail == dto.Email);
+
+            if (participant != null)
             {
-                // Look up the Participant using the email that was typed in
-                var participant = _context.Participants.FirstOrDefault(p =>p.ParticipantEmail == dto.Email);
-
-                // If there is no email, the user will get an error
-                if (participant == null)
+                if (!BCrypt.Net.BCrypt.Verify(dto.Password, organiser.OrganiserPassword))
                     return Unauthorized("Invalid email or password");
 
-                // Compare the typed password with the stored hash, user gets an error if it doesn't match
-                if (!BCrypt.Net.BCrypt.Verify(dto.Password, participant.ParticipantPassword))
-                    return Unauthorized("Invalid email or password");
-
-                // Log user in for Participant
-                HttpContext.Session.SetInt32("UserId", participant.ParticipantId);
-                HttpContext.Session.SetString("Role", "Participant");
-
+                HttpContext.Session.SetInt32(SessionsKeyUserId, participant.ParticipantId);
+                HttpContext.Session.SetString(SessionsKeyRole, "Participant");
+                return Ok("Login Successfull");
             }
-
-            else
-            {
-                return BadRequest("Role can either be Organiser or Participant");
-            }
-                return Ok("Login Successful");
+            // Email not found in either table
+            return Unauthorized("Invalid email or password");
         }
 
         [HttpPost("logout")]
