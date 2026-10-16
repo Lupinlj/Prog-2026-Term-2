@@ -17,6 +17,15 @@ namespace RaceDay.Controllers
             _context = context;
         }
 
+        /// <summary>
+        ///  List an event's categories
+        /// </summary> 
+        /// <param name="eventId">The id of the event whose categories are listed</param>
+        ///  <response code= "200">Categories returned.</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "404">Event not found.</response>
+        /// <returns></returns>
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -41,8 +50,19 @@ namespace RaceDay.Controllers
             return Ok(categories);
         }
 
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        /// <summary>
+        ///  Adds a category to the Organiser's own events
+        /// </summary> 
+        /// <param name="id">THE event to add the category to.</param>
+        /// <param name="dto">The category name (not event fields)</param>
+        ///  <response code= "201">Category created</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "403">Not an Organiser or not the owner of this event.</response>
+        ///  <response code= "404">Event not found.</response>
+        /// <returns></returns>
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -79,6 +99,7 @@ namespace RaceDay.Controllers
             return StatusCode(StatusCodes.Status201Created, new { category.CategoryId, category.CategoryName, category.EventId });
 
         }
+
     }
 }
 

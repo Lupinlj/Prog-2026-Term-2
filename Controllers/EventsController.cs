@@ -21,6 +21,13 @@ namespace RaceDay.Controllers
         private static bool ValidEventType(string type) =>
             type == "Run" || type == "Walk" || type == "Cycle";
 
+        /// <summary>
+        ///  Lists all events. Available to any logged-in user.
+        /// </summary> 
+        ///  <response code= "200">List of events returned.</response>
+        ///  <response code= "401">Not logged in.</response>
+        /// <returns></returns>
+        /// 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -40,6 +47,14 @@ namespace RaceDay.Controllers
 
 
         }
+        /// <summary>
+        ///  Returns a single event by its id
+        /// </summary> 
+        /// <param name="id">The id of the event.</param>
+        ///  <response code= "200">Event returned.</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "404">Event not found.</response>
+        /// <returns></returns>
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -65,6 +80,7 @@ namespace RaceDay.Controllers
 
             return Ok(eventItem);
         }
+
 
         [HttpPost]
         public IActionResult CreateEvent(EventDto dto)
@@ -109,6 +125,17 @@ namespace RaceDay.Controllers
             return Ok(newEvent);
         }
 
+        /// <summary>
+        ///  Updates one of the Organiser's own events.
+        /// </summary> 
+        /// <param name="id">The id of the event to update.</param>
+        /// <param name="dto">New name, description, date, location, distance and event type.</param>
+        ///  <response code= "200">Event updated.</response>
+        ///  <response code= "400">Invalid eent type (must be Run, Walk or Cycle(.</response> 
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "403">Only Organisers can update events, and only their own.</response> 
+        ///  <response code= "404">Event not found.</response>
+        /// <returns></returns>
         [HttpPut("{Id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -147,12 +174,20 @@ namespace RaceDay.Controllers
             eventItem.EventLocation = dto.EventLocation;
             eventItem.Distance = dto.Distance;
             eventItem.EventType = dto.EventType;
-            eventItem.OrganiserId = userId.Value;
-
+         
             _context.SaveChanges();
             return Ok(eventItem);
         }
 
+        /// <summary>
+        ///  Deletes one of the Organiser's own events.
+        /// </summary> 
+        /// <param name="id">The id of the evvent to delete.</param>
+        ///  <response code= "200">Event deleted.</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "403">Only Organisers can delete events, and only their own..</response> 
+        ///  <response code= "404">Event not found.</response>
+        /// <returns></returns>
 
         [HttpDelete("{Id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -179,6 +214,8 @@ namespace RaceDay.Controllers
 
             if (eventItem.OrganiserId != userId.Value)
                 return StatusCode(StatusCodes.Status403Forbidden, "You can only delete your own events");
+
+            var categories = 
 
             _context.Events.Remove(eventItem);
             _context.SaveChanges();

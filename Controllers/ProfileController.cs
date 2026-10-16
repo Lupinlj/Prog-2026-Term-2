@@ -19,6 +19,14 @@ namespace RaceDay.Controllers
             _context = context;
         }
 
+        /// <summary>
+        ///  Returns the logged-in user's name and email
+        /// </summary> 
+        ///  <response code= "200">Profile returned.</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "404">User no longer exists.</response>
+        /// <returns></returns>
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -56,6 +64,16 @@ namespace RaceDay.Controllers
             // Role in the session was neither Organiser nor Participant
             return Unauthorized("Please log in");
         }
+
+        /// <summary>
+        ///  Updates the logged-in user's name and email.
+        /// </summary>  
+        /// <param name="dto">New name and email.</param>
+        ///  <response code= "200">Profile updated.</response>
+        ///  <response code= "400">Invalid fields, or the email is already used by another account.</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "404">User no longer exists.</response>
+        /// <returns></returns>
 
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -100,7 +118,7 @@ namespace RaceDay.Controllers
                     return BadRequest("That email is already registerd");
 
                 var participant = _context.Participants.FirstOrDefault(p => p.ParticipantId == userId.Value);
-                if (organiser == null)
+                if (participant == null)
                     return NotFound("Organsier not found");
 
                 participant.ParticipantName = dto.Name;

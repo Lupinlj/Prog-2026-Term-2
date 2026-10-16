@@ -17,6 +17,17 @@ namespace RaceDay.Controllers
             _context = context;
         }
 
+        /// <summary>
+        ///  Records a finish time and position for an  enrolment in the Organiser's own event.
+        /// </summary> 
+        /// <param name="enrolmentId">The id of the enrolment.</param>
+        /// <param name="dto">Finish time and position.</param>
+        ///  <response code= "201">Result recorded.</response>
+        ///  <response code= "400">A result already exists for this enrolment.</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "403">Not an Organiser, or not the owner of this event.</response>
+        ///  <response code= "404">Enrolment, category or event not found.</response>
+        /// <returns></returns>
 
         [HttpPost("enrolments/{enrolmentId}/result")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -72,7 +83,14 @@ namespace RaceDay.Controllers
             return StatusCode(StatusCodes.Status201Created, new { result.ResultId, result.EnrolmentId, result.FinishTime, result.Position });
         }
 
-
+        /// <summary>
+        ///  List the Participant's own results
+        /// </summary> 
+        ///  <response code= "200">Result returned.</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "403">Only Participants can view their results.</response>
+        /// <returns></returns>
+        
         [HttpGet("results/mine")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -90,7 +108,7 @@ namespace RaceDay.Controllers
             if (role != "Participant")
                 return StatusCode(StatusCodes.Status403Forbidden, "Participant only");
 
-            // Get this event's enrolments, with each participant's details
+            // Get this participant's results, with the events category
             var results = (from r in _context.Results
                            join en in _context.Enrolments on r.EnrolmentId equals en.EnrolmentId
                            join c in _context.Categories on en.CategoryId equals c.CategoryId

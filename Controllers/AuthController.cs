@@ -25,7 +25,13 @@ namespace RaceDay.Controllers
         {
             _context = context;
         }
-
+        /// <summary>
+        ///  Register a new Organiser or Participant account.
+        /// </summary>  
+        /// <param name="dto">Name, email, pasword and role ("Organiser" or "Participant").</param>
+        ///  <response code= "200">Account created.l</response>
+        ///  <response code= "400">Missing fields, email already registerd, or invalid role.</response>
+        /// <returns></returns>
 
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -83,6 +89,14 @@ namespace RaceDay.Controllers
         }
 
 
+        /// <summary>
+        ///  Logs in an existing user and starts their session. 
+        /// </summary>  
+        ///  <response code= "200">Login successful</response>
+        ///  <response code= "401">Invalid email or password</response>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -117,7 +131,15 @@ namespace RaceDay.Controllers
             return Unauthorized("Invalid email or password");
         }
 
+        /// <summary>
+        ///  Logs out the current user by clearing their session.
+        /// </summary>  
+        /// <param name="dto">Email and password</param>
+        ///  <response code= "200">Sucessfully logged out.</response>
+        /// <returns></returns>
+      
         [HttpPost("logout")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public IActionResult Logout()
         { 
             // Clear everyting stored in the session (the user ID and role), so they are logged out

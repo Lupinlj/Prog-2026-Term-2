@@ -16,6 +16,18 @@ namespace RaceDay.Controllers
             _context = context;
         }
 
+        /// <summary>
+        ///  Enrols the participant in an event with a chosen category.
+        /// </summary> 
+        /// <param name="eventId">The id of the event to enrol in</param>
+        /// <param name="dto">The 9d 0f the category to enrol in.</param>
+        ///  <response code= "200">Enrolled</response>
+        ///  <response code= "400">Category not in this event or already enrolled.</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "403">Only Participant can enrol.</response>
+        ///  <response code= "404">Event not found</response>
+        /// <returns></returns>
+
         [HttpPost("events/{eventId}/enrolments")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -62,12 +74,20 @@ namespace RaceDay.Controllers
             return StatusCode(StatusCodes.Status201Created, new { enrolment.EnrolmentId, enrolment.Category });
         }
 
+        /// <summary>
+        /// List the Participant's own enrolments
+        /// </summary> 
+        ///  <response code= "200">Enrolment returned.</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "403">Only Participants can view their enrolments.</response>
+        /// <returns></returns>
+
 
         [HttpGet("enrolments/mine")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public IActionResult GetMyEnrolments()
+        public IActionResult GetMyEnrolment()
         {
             var userId = HttpContext.Session.GetInt32(AuthController.SessionsKeyUserId);
             var role = HttpContext.Session.GetString(AuthController.SessionsKeyRole);
@@ -97,6 +117,17 @@ namespace RaceDay.Controllers
 
             return Ok(enrolments);
         }
+
+        /// <summary>
+        ///  List all the enrolments for the Organiser's own event
+        /// </summary> 
+        /// <param name="eventId">The id of the event.</param>
+        ///  <response code= "200">Enrolments returned.</response>
+        ///  <response code= "401">Not logged in.</response>
+        ///  <response code= "403">Not an Organiser, or not the owner of this event.</response>
+        ///  <response code= "404">Event not found..</response>
+        /// <returns></returns>
+
         [HttpGet("events/{eventId}/enrolments")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -128,7 +159,7 @@ namespace RaceDay.Controllers
             var enrolments = (from en in _context.Enrolments
                               join c in _context.Categories on en.CategoryId equals c.CategoryId
                               join e in _context.Events on c.EventId equals e.EventId
-                              where en.ParticipantId == userId.Value
+                              where c.EventId == userId.Value
                               select new
                               {
                                   en.EnrolmentId,
