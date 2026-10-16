@@ -79,6 +79,7 @@ namespace RaceDay.Controllers
             if (role != "Participant")
                 return StatusCode(StatusCodes.Status403Forbidden, "Participat only");
 
+            // Get this event's enrolments, with each participant's details
             var enrolments = (from en in _context.Enrolments
                               join c in _context.Categories on en.CategoryId equals c.CategoryId
                               join e in _context.Events on c.EventId equals e.EventId
@@ -96,7 +97,51 @@ namespace RaceDay.Controllers
 
             return Ok(enrolments);
         }
+        [HttpGet("events/{eventId}/enrolments")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
 
-      
+        public IActionResult GetMyEnrolments(int eventId)
+        {
+
+            var userId = HttpContext.Session.GetInt32(AuthController.SessionsKeyUserId);
+            var role = HttpContext.Session.GetString(AuthController.SessionsKeyRole);
+
+            if (userId == null)
+                return Unauthorized("Please log in");
+
+            if (role != "Organiser")
+                return StatusCode(StatusCodes.Status403Forbidden, "Organiser only");
+
+            var eventItem = _context.Events.FirstOrDefault(e => e.EventId == eventId);
+            if (eventItem == null)
+                return NotFound("Event not found");
+
+
+            // Organiser can only view enrolments for their own events
+            if (eventItem.OrganiserId != userId.Value)
+                return StatusCode(StatusCodes.Status403Forbidden, "You can only view enrolmets for your own events");
+
+            // Get this event's enrolments, with each participant's details
+            var enrolments = (from en in _context.Enrolments
+                              join c in _context.Categories on en.CategoryId equals c.CategoryId
+                              join e in _context.Events on c.EventId equals e.EventId
+                              where en.ParticipantId == userId.Value
+                              select new
+                              {
+                                  en.EnrolmentId,
+                                  c.CategoryId,
+                                  c.CategoryName,
+                                  e.EventId,
+                                  e.EventName,
+                                  e.EventDate
+                              }).ToList();
+            return Ok(enrolments);
+        }
+
+
+
     }
 }
