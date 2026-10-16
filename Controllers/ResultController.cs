@@ -48,7 +48,7 @@ namespace RaceDay.Controllers
 
             var eventItem = _context.Events.FirstOrDefault(e => e.EventId == category.EventId);
             if (eventItem == null)
-                return NotFound("Event not found");   
+                return NotFound("Event not found");
 
             // The organiser can only record result for their own events
             if (eventItem.OrganiserId != userId.Value)
@@ -69,7 +69,49 @@ namespace RaceDay.Controllers
             _context.Results.Add(result);
             _context.SaveChanges();
 
-            return StatusCode(StatusCodes.Status201Created, new {result.ResultId, result.EnrolmentId, result.FinishTime, result.Position});
+            return StatusCode(StatusCodes.Status201Created, new { result.ResultId, result.EnrolmentId, result.FinishTime, result.Position });
+        }
+
+
+        [HttpGet("results/mine")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+
+        public IActionResult GetMyResults()
+        {
+            var userId = HttpContext.Session.GetInt32(AuthController.SessionsKeyUserId);
+            var role = HttpContext.Session.GetString(AuthController.SessionsKeyRole);
+
+
+            if (userId == null)
+                return Unauthorized("Please log in");
+
+            if (role != "Participant")
+                return StatusCode(StatusCodes.Status403Forbidden, "Participant only");
+
+            // Get this event's enrolments, with each participant's details
+            var results = (from r in _context.Results
+                           join en in _context.Enrolments on r.EnrolmentId equals en.EnrolmentId
+                           join c in _context.Categories on en.CategoryId equals c.CategoryId
+                           join e in _context.Events on c.EventId equals e.EventId
+                           where en.ParticipantId == userId.Value
+                           select new
+                           
+                           {
+                           
+                               r.ResultId,
+                               r.FinishTime,
+                               r.Position,                                     
+                               c.CategoryName,
+                               e.EventId,
+                               e.EventName,
+                               e.EventDate
+                              
+                           }).ToList();
+
+
+            return Ok(results);
         }
     }
 }
