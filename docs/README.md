@@ -43,7 +43,23 @@ All endpoints are documented in Swagger. They cover auth (register, login, logou
 dotnet test RaceDay.slnx
 ```
 
+
 ## CI/CD
+
 A GitHub Actions workflow (`.github/workflows/dotnet.yml`) builds the project and runs all unit tests on every push.
+
+**Repository structure validation:**
+
 <img width="1453" height="262" alt="image" src="https://github.com/user-attachments/assets/b7bfcd0a-2422-4149-a8a4-27e28377c9cf" />
+
+**Build and test (green build):**
+
+
+<img width="1410" height="155" alt="image" src="https://github.com/user-attachments/assets/bf2464cd-3238-4ba8-9c05-490124233b10" />
+
+
+
+
+
+
 
