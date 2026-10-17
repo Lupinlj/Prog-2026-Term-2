@@ -137,62 +137,15 @@ namespace RaceDay.Controllers
         /// <param name="dto">Email and password</param>
         ///  <response code= "200">Sucessfully logged out.</response>
         /// <returns></returns>
-      
+
         [HttpPost("logout")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IActionResult Logout()
-        { 
+        {
             // Clear everyting stored in the session (the user ID and role), so they are logged out
             HttpContext.Session.Clear();
 
-            return Ok("Logged out"); 
-        }
-
-        [HttpPost("status")]
-        public IActionResult Status()
-        {
-            // Read who is logged in from the session
-            var id = HttpContext.Session.GetInt32("UserId");
-            var role = HttpContext.Session.GetString("Role");
-
-            // Nobody logged in, user get error
-            if (id == null)
-                return Unauthorized("Please log in");
-
-            // Logged in, so report the role and ID
-            return Ok($"Logged in as {role}, ID {id}");
-        }
-
-        [HttpPost("organiser-only")]
-        public IActionResult OrganiserOnly()
-        {
-            // To check the status of the user is logged in
-            var loginCheck = Status();
-            if (loginCheck is UnauthorizedObjectResult)
-                return loginCheck;
-
-            // Logged in, But not an Organiser, so user gets error
-            var role = HttpContext.Session.GetString("Role");
-            if (role != "Organiser")
-                return StatusCode(StatusCodes.Status403Forbidden, "Organiser only");
-
-            return Ok("Welcome, Organiser");
-        }
-
-        [HttpPost("participant-only")]
-        public IActionResult ParticipantOnly()
-        {
-            // To check the status of the user is logged in
-            var loginCheck = Status();
-            if (loginCheck is UnauthorizedObjectResult)
-                return loginCheck;
-
-            // Logged in, But not an Participant, so user gets error
-            var role = HttpContext.Session.GetString("Role");
-            if (role != "Participant")
-                return StatusCode(StatusCodes.Status403Forbidden, "Participant only");
-
-            return Ok("Welcome, Participant");
+            return Ok("Logged out");
         }
     }
 }
