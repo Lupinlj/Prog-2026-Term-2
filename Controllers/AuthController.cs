@@ -112,7 +112,7 @@ namespace RaceDay.Controllers
 
                 HttpContext.Session.SetInt32(SessionsKeyUserId, organiser.OrganiserId);
                 HttpContext.Session.SetString(SessionsKeyRole, "Organiser");
-                return Ok("Login Successfull");
+                return Ok(new { role = "Organiser" });
             }
 
             // Check to see if its Participant
@@ -120,12 +120,12 @@ namespace RaceDay.Controllers
 
             if (participant != null)
             {
-                if (!BCrypt.Net.BCrypt.Verify(dto.Password, organiser.OrganiserPassword))
+                if (!BCrypt.Net.BCrypt.Verify(dto.Password, participant.ParticipantPassword))
                     return Unauthorized("Invalid email or password");
 
                 HttpContext.Session.SetInt32(SessionsKeyUserId, participant.ParticipantId);
                 HttpContext.Session.SetString(SessionsKeyRole, "Participant");
-                return Ok("Login Successfull");
+                return Ok(new { role = "Participant"});
             }
             // Email not found in either table
             return Unauthorized("Invalid email or password");
