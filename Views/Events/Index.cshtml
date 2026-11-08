@@ -4,6 +4,10 @@
 }
 
 <h2>My Events</h2>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 <a asp-action="Create" class="btn btn-primary mb-3">Create event</a>
 
 <table class="table">
@@ -26,7 +30,13 @@
                 <td>@e.Distance</td>
                 <td>@e.EventDate.ToString("dd MMM yyyy")</td>
                 <td>@e.EventLocation</td>
-                <td><a asp-action="Edit" asp-route-id="@e.EventId">Edit</a></td>
+                <td>
+                   <a asp-action="Edit" asp-route-id="@e.EventId">Edit</a>
+                   <form asp-action="Delete" asp-route-id="@e.EventId" method="post" class="d-inline"
+                        onsubmit="return confirm('Delete this event?');">
+                        <button type="submit" class="btn btn-link text-danger p-0">Delete</button>
+                  </form>
+                </td>
             </tr>
         }
     </tbody>

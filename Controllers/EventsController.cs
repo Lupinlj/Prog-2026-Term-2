@@ -163,5 +163,28 @@ namespace RaceDay.Web.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (HttpContext.Session.GetString("Role") != "Organiser")
+                return RedirectToAction("Login", "Account");
+
+            var client = _factory.CreateClient("RaceDayApi");
+            client.DefaultRequestHeaders.Add("Cookie", HttpContext.Session.GetString("ApiCookie"));
+
+            var response = await client.DeleteAsync($"api/Events/{id}");
+
+            if(response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                HttpContext.Session.Clear();return RedirectToAction("Login", "Account");
+            }
+
+            if (!response.IsSuccessStatusCode)
+                TempData["Error"] = await response.Content.ReadAsStringAsync();
+
+
+            return RedirectToAction("Index");
+        }
     }
 }
