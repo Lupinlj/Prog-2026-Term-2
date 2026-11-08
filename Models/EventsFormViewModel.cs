@@ -22,5 +22,7 @@ namespace RaceDay.Web.Models
 
         [Required]
         public string EventType { get; set; } = "";
+
+        public int EventId { get; set;  }
     }
 }

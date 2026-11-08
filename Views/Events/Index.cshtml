@@ -1,7 +1,6 @@
 ﻿@model List<RaceDay.Web.Models.EventViewModel>
 @{
     ViewData["Title"] = "My Events";
-
 }
 
 <h2>My Events</h2>
@@ -15,6 +14,7 @@
             <th>Distance</th>
             <th>Date</th>
             <th>Location</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -26,6 +26,7 @@
                 <td>@e.Distance</td>
                 <td>@e.EventDate.ToString("dd MMM yyyy")</td>
                 <td>@e.EventLocation</td>
+                <td><a asp-action="Edit" asp-route-id="@e.EventId">Edit</a></td>
             </tr>
         }
     </tbody>

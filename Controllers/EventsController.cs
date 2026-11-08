@@ -51,7 +51,7 @@ namespace RaceDay.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> create (EventsFormViewModel model)
+        public async Task<IActionResult> Create (EventsFormViewModel model)
         {
             if (HttpContext.Session.GetString("Role") != "Organiser")
                 return RedirectToAction("Login", "Account");
@@ -70,6 +70,83 @@ namespace RaceDay.Web.Controllers
                 eventLocation = model.EventLocation,
                 distance = model.Distance,
                 eventType = model.EventType
+            });
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                HttpContext.Session.Clear();
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ModelState.AddModelError("", await response.Content.ReadAsStringAsync());
+                return View(model);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            if (HttpContext.Session.GetString("Role") != "Organiser")
+                return RedirectToAction("Login", "Account");
+
+            var client = _factory.CreateClient("RaceDayApi");
+            client.DefaultRequestHeaders.Add("cookie", HttpContext.Session.GetString("ApiCookie"));
+
+            var response = await client.GetAsync($"api/Events/{id}");
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                HttpContext.Session.Clear();
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (!response.IsSuccessStatusCode)
+                return RedirectToAction("Index");
+
+            var ev = await response.Content.ReadFromJsonAsync<EventViewModel>();
+
+            // Organiser can only edit their own events
+            if (ev!.OrganiserId != HttpContext.Session.GetInt32("UserId"))
+                return RedirectToAction("Index");
+
+            return View(new EventsFormViewModel
+            {
+                EventId = ev.EventId,
+                EventName = ev.EventName,
+                EventDescription = ev.EventDescription,
+                EventDate = ev.EventDate,
+                EventLocation = ev.EventLocation,
+                Distance = ev.Distance,
+                EventType = ev.EventType,
+
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(EventsFormViewModel model)
+        {
+            if (HttpContext.Session.GetString("Role") != "Organiser")
+                return RedirectToAction("Login", "Account");
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var client = _factory.CreateClient("RaceDayApi");
+            client.DefaultRequestHeaders.Add("Cookie", HttpContext.Session.GetString("ApiCookie"));
+
+            var response = await client.PutAsJsonAsync($"api/Events/{model.EventId}", new
+            {
+                eventName = model.EventName,
+                eventDescription = model.EventDescription,
+                eventDate = model.EventDate,
+                eventLocation = model.EventLocation,
+                distance = model.Distance,
+                eventType = model.EventType            
             });
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
