@@ -1,0 +1,32 @@
+﻿@model List<RaceDay.Web.Models.EventViewModel>
+@{
+    ViewData["Title"] = "My Events";
+
+}
+
+<h2>My Events</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">Create event</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Distance</th>
+            <th>Date</th>
+            <th>Location</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            <tr>
+                <td>@e.EventName</td>
+                <td>@e.EventType</td>
+                <td>@e.Distance</td>
+                <td>@e.EventDate.ToString("dd MMM yyyy")</td>
+                <td>@e.EventLocation</td>
+            </tr>
+        }
+    </tbody>
+</table>

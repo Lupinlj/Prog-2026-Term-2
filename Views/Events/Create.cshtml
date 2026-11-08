@@ -1,0 +1,54 @@
+﻿@model RaceDay.Web.Models.EventsFormViewModel
+@{
+    ViewData["Title"] = "Create Event";
+}
+
+<h2>Create Event</h2>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="EventName" class="form-label">Name</label>
+        <input asp-for="EventName" class="form-control" />
+        <span asp-validation-for="EventName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EventDescription" class="form-label">Description</label>
+        <textarea asp-for="EventDescription" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="EventDescription" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EventDate" class="form-label">Date</label>
+        <input asp-for="EventDate" type="datetime-local" class="form-control" />
+        <span asp-validation-for="EventDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EventLocation" class="form-label">Location</label>
+        <input asp-for="EventLocation" class="form-control" />
+        <span asp-validation-for="EventLocation" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Distance" class="form-label">Distance (km)</label>
+        <input asp-for="Distance" class="form-control" />
+        <span asp-validation-for="Distance" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EventType" class="form-label">Event type</label>
+        <select asp-for="EventType" class="form-select">
+            <option value="">-- Select event type --</option>
+            <option value="Run">Run</option>
+            <option value="Walk">Walk</option>
+            <option value="Cycle">Cycle</option>
+        </select>
+        <span asp-validation-for="EventType" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
