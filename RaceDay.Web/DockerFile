@@ -8,7 +8,7 @@ RUN dotnet restore
 
 # Copy the rest and publish
 COPY . ./
-RUN dotnet publish -c Release -o /app/publish --no-restore
+RUN dotnet publish -c Release -o /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
@@ -19,4 +19,4 @@ ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
 USER $APP_UID
-ENTRYPOINT ["dotnet", "RaceDay.Web.dll"]
+ENTRYPOINT ["dotnet", "RaceDay.Web.dll"]s
