@@ -186,5 +186,33 @@ namespace RaceDay.Web.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            if (HttpContext.Session.GetString("Role") != "Participant")
+                return RedirectToAction("Login", "Account");
+
+            var client = _factory.CreateClient("RaceDayApi");
+            client.DefaultRequestHeaders.Add("Cookie", HttpContext.Session.GetString("ApiCookie"));
+
+            // 1. Get the Event
+            var eventResponse = await client.GetAsync($"api/Events/{id}");
+            if (!eventResponse.IsSuccessStatusCode) return RedirectToAction("ParticipantHome", "Home");
+
+            var eventData = await eventResponse.Content.ReadFromJsonAsync<EventViewModel>();
+
+            // 2. Get the Categories for this event
+            var catResponse = await client.GetAsync($"api/events/{id}/categories");
+            var categories = await catResponse.Content.ReadFromJsonAsync<List<CategoryViewModel>>();
+
+            var viewModel = new EventDetailsViewModel
+            {
+                Event = eventData!,
+                Categories = categories ?? new List<CategoryViewModel>()
+            };
+
+            return View(viewModel);
+        }
     }
 }
