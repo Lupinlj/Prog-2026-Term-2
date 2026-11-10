@@ -24,37 +24,43 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                            @if (role == "Organiser")
-                            {
-                                <li class="nav-item">
-                                 <a class="nav-link text-dark" asp-controller="Home" asp-action="OrganiserHome">Dashboard</a>
-                                </li>
-                                <li>
-                                 <a class="nav-link text-dark" asp-controller="Events" asp-action="Index">My Events</a>
-                                </li>
-                                <li class="nav-item ms-auto">
-                                 <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Logout</a>
-                                </li>
-                            }
-                            else if (role == "Participant")
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Home" asp-action="ParticipantHome">Home</a>
-                                </li>
-                                <li class="nav-item ms-auto">
-                                    <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Logout</a>
-                                </li>
-                            }
-                            else
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
-                                </li>
-                            }
-                        </ul>
+                        @if (role == "Organiser")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="OrganiserHome">Dashboard</a>
+                            </li>
+                            <li>
+                                <a class="nav-link text-dark" asp-controller="Events" asp-action="Index">My Events</a>
+                            </li>
+                            <li class="nav-item ms-auto">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        }
+                        else if (role == "Participant")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="ParticipantHome">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Enrolments" asp-action="Index">My Enrolments</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Results" asp-action="Index">My Results</a>
+                            </li>
+                            <li class="nav-item ms-auto">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                        }
+                    </ul>
                 </div>
             </div>
         </nav>

@@ -1,138 +1,81 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using RaceDay.Data;
-using RaceDay.Models;
-using RaceDay.DTO;
+﻿using Microsoft.AspNetCore.Mvc;
+using RaceDay.Web.Models;
+using System.Net;
 
-namespace RaceDay.Controllers
+namespace RaceDay.Web.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-
-
-    public class ProfileController : ControllerBase
+    public class ProfileController : Controller
     {
+        private readonly IHttpClientFactory _factory;
 
-        private readonly AppDbContext _context;
-        public ProfileController(AppDbContext context)
+        public ProfileController(IHttpClientFactory factory)
         {
-            _context = context;
+            _factory = factory;
         }
 
-        /// <summary>
-        ///  Returns the logged-in user's name and email
-        /// </summary> 
-        ///  <response code= "200">Profile returned.</response>
-        ///  <response code= "401">Not logged in.</response>
-        ///  <response code= "404">User no longer exists.</response>
-        /// <returns></returns>
-
+        // Show the profile page
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-
-        public IActionResult GetProfile()
+        public async Task<IActionResult> Index()
         {
-            var userId = HttpContext.Session.GetInt32(AuthController.SessionsKeyUserId);
-            var role = HttpContext.Session.GetString(AuthController.SessionsKeyRole);
+            if (HttpContext.Session.GetString("Role") == null)
+                return RedirectToAction("Login", "Account");
 
+            var client = _factory.CreateClient("RaceDayApi");
 
-            if (userId == null)
-                return Unauthorized("Please log in");
+            var cookie = HttpContext.Session.GetString("ApiCookie");
+            if (cookie != null)
+                client.DefaultRequestHeaders.Add("Cookie", cookie);
 
-            if (role == "Organiser")
+            var response = await client.GetAsync("api/Profile");
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                var organiser = _context.Organisers.FirstOrDefault(o => o.OrganiserId == userId.Value);
-
-                if (organiser == null)
-                    return NotFound("Organiser not found");
-
-                return Ok(new { Name = organiser.OrganiserName, Email = organiser.OrganiserEmail });
+                HttpContext.Session.Clear();
+                return RedirectToAction("Login", "Account");
             }
 
-            if (role == "Participant")
-            {
-                var participant = _context.Participants.FirstOrDefault(p => p.ParticipantId == userId.Value);
+            var profile = await response.Content.ReadFromJsonAsync<ProfileViewModel>();
 
-                if (participant == null)
-                    return NotFound("Participant not found");
-
-                return Ok(new { Name = participant.ParticipantName, Email = participant.ParticipantEmail });
-            }
-
-            // Role in the session was neither Organiser nor Participant
-            return Unauthorized("Please log in");
+            return View(profile);
         }
 
-        /// <summary>
-        ///  Updates the logged-in user's name and email.
-        /// </summary>  
-        /// <param name="dto">New name and email.</param>
-        ///  <response code= "200">Profile updated.</response>
-        ///  <response code= "400">Invalid fields, or the email is already used by another account.</response>
-        ///  <response code= "401">Not logged in.</response>
-        ///  <response code= "404">User no longer exists.</response>
-        /// <returns></returns>
-
-        [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-
-        public IActionResult UpdateProfile(ProfileDto dto)
+        // Update the profile
+        [HttpPost]
+        public async Task<IActionResult> Index(ProfileViewModel model)
         {
+            if (HttpContext.Session.GetString("Role") == null)
+                return RedirectToAction("Login", "Account");
 
+            if (!ModelState.IsValid)
+                return View(model);
 
-            var userId = HttpContext.Session.GetInt32(AuthController.SessionsKeyUserId);
-            var role = HttpContext.Session.GetString(AuthController.SessionsKeyRole);
+            var client = _factory.CreateClient("RaceDayApi");
 
-            if (userId == null)
-                return Unauthorized("Please log in");
+            var cookie = HttpContext.Session.GetString("ApiCookie");
+            if (cookie != null)
+                client.DefaultRequestHeaders.Add("Cookie", cookie);
 
-            if (role == "Organiser")
+            // Call the API to update
+            var response = await client.PutAsJsonAsync("api/Profile", new
             {
-                
-                bool emailTaken = _context.Organisers.Any(o => o.OrganiserEmail == dto.Email && o.OrganiserId != userId.Value) || _context.Participants.Any(p => p.ParticipantEmail == dto.Email);
+                name = model.Name,
+                email = model.Email
+            });
 
-                if (emailTaken)
-                    return BadRequest("That email is already registerd");
-
-                var organiser = _context.Organisers.FirstOrDefault(o => o.OrganiserId == userId.Value);
-                if (organiser == null)
-                    return NotFound("Organsier not found");
-
-                organiser.OrganiserName = dto.Name;
-                organiser.OrganiserEmail = dto.Email;
-                _context.SaveChanges();
-
-                return Ok(new { name = organiser.OrganiserName, Email = organiser.OrganiserEmail });
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                HttpContext.Session.Clear();
+                return RedirectToAction("Login", "Account");
             }
 
-            if (role == "Participant")
+            if (!response.IsSuccessStatusCode)
             {
-                bool emailTaken = _context.Participants.Any(p => p.ParticipantEmail == dto.Email && p.ParticipantId != userId.Value) || _context.Participants.Any(p => p.ParticipantEmail == dto.Email);
-
-                if (emailTaken)
-                    return BadRequest("That email is already registerd");
-
-                var participant = _context.Participants.FirstOrDefault(p => p.ParticipantId == userId.Value);
-                if (participant == null)
-                    return NotFound("Organsier not found");
-
-                participant.ParticipantName = dto.Name;
-                participant.ParticipantEmail = dto.Email;
-                _context.SaveChanges();
-
-                return Ok(new { name = participant.ParticipantName, Email = participant.ParticipantEmail });
+                ModelState.AddModelError("", await response.Content.ReadAsStringAsync());
+                return View(model);
             }
 
-            return Unauthorized("Please log in");
+            TempData["Success"] = "Profile updated successfully!";
+            return RedirectToAction("Index");
         }
-
-
-
     }
-
 }
