@@ -1,11 +1,19 @@
 using Microsoft.AspNetCore.Mvc;
 using RaceDay.Web.Models;
 using System.Diagnostics;
+using System.Net;
 
 namespace RaceDay.Web.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IHttpClientFactory _factory;
+
+        public HomeController(IHttpClientFactory factory)
+        {
+            _factory = factory;
+        }
+
         public IActionResult Index()
         {
             return View();
@@ -24,12 +32,27 @@ namespace RaceDay.Web.Controllers
 
         public IActionResult OrganiserHome()
         {
+            var role = HttpContext.Session.GetString("Role");
+
+            if (role != "Organiser")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             return View();
         }
 
         public IActionResult ParticipantHome()
         {
+            var role = HttpContext.Session.GetString("Role");
+
+            if (role != "Participant")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             return View();
         }
+
     }
 }
