@@ -1,135 +1,70 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using RaceDay.Data;
-using RaceDay.DTO;
-using RaceDay.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using RaceDay.Web.Models;
+using System.Net;
 
-namespace RaceDay.Controllers
+namespace RaceDay.Web.Controllers
 {
-    [Route("api")]
-    [ApiController]
-    public class ResultController : ControllerBase
+    public class ResultsController : Controller
     {
+        private readonly IHttpClientFactory _factory;
 
-        private readonly AppDbContext _context;
-        public ResultController(AppDbContext context)
+        public ResultsController(IHttpClientFactory factory)
         {
-            _context = context;
+            _factory = factory;
         }
 
-        /// <summary>
-        ///  Records a finish time and position for an  enrolment in the Organiser's own event.
-        /// </summary> 
-        /// <param name="enrolmentId">The id of the enrolment.</param>
-        /// <param name="dto">Finish time and position.</param>
-        ///  <response code= "201">Result recorded.</response>
-        ///  <response code= "400">A result already exists for this enrolment.</response>
-        ///  <response code= "401">Not logged in.</response>
-        ///  <response code= "403">Not an Organiser, or not the owner of this event.</response>
-        ///  <response code= "404">Enrolment, category or event not found.</response>
-        /// <returns></returns>
-
-        [HttpPost("enrolments/{enrolmentId}/result")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-
-        public IActionResult CaptureResult(int enrolmentId, ResultDto dto)
+        // Show the form to enter a result
+        [HttpGet]
+        public IActionResult Create(int enrolmentId, int eventId)
         {
+            if (HttpContext.Session.GetString("Role") != "Organiser")
+                return RedirectToAction("Login", "Account");
 
-
-            var userId = HttpContext.Session.GetInt32(AuthController.SessionsKeyUserId);
-            var role = HttpContext.Session.GetString(AuthController.SessionsKeyRole);
-
-            if (userId == null)
-                return Unauthorized("Please log in");
-
-            if (role != "Organiser")
-                return StatusCode(StatusCodes.Status403Forbidden, "Organiser only");
-
-            var enrolment = _context.Enrolments.FirstOrDefault(en => en.EnrolmentId == enrolmentId);
-            if (enrolment == null)
-                return NotFound("Enrolment not found");
-
-            var category = _context.Categories.FirstOrDefault(c => c.CategoryId == enrolment.CategoryId);
-            if (category == null)
-                return NotFound("Category not found");
-
-            var eventItem = _context.Events.FirstOrDefault(e => e.EventId == category.EventId);
-            if (eventItem == null)
-                return NotFound("Event not found");
-
-            // The organiser can only record result for their own events
-            if (eventItem.OrganiserId != userId.Value)
-                return StatusCode(StatusCodes.Status403Forbidden, "You can only record results for your own events");
-
-            // One result per enrolment
-
-            if (_context.Results.Any(r => r.EnrolmentId == enrolmentId))
-                return BadRequest("A result has already been recorded for this enrolment");
-
-            var result = new Result
+            var model = new ResultFormViewModel
             {
                 EnrolmentId = enrolmentId,
-                FinishTime = dto.FinishTime,
-                Position = dto.Position
+                EventId = eventId
             };
 
-            _context.Results.Add(result);
-            _context.SaveChanges();
-
-            return StatusCode(StatusCodes.Status201Created, new { result.ResultId, result.EnrolmentId, result.FinishTime, result.Position });
+            return View(model);
         }
 
-        /// <summary>
-        ///  List the Participant's own results
-        /// </summary> 
-        ///  <response code= "200">Result returned.</response>
-        ///  <response code= "401">Not logged in.</response>
-        ///  <response code= "403">Only Participants can view their results.</response>
-        /// <returns></returns>
-        
-        [HttpGet("results/mine")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-
-        public IActionResult GetMyResults()
+        // Save the result to the API
+        [HttpPost]
+        public async Task<IActionResult> Create(ResultFormViewModel model)
         {
-            var userId = HttpContext.Session.GetInt32(AuthController.SessionsKeyUserId);
-            var role = HttpContext.Session.GetString(AuthController.SessionsKeyRole);
+            if (HttpContext.Session.GetString("Role") != "Organiser")
+                return RedirectToAction("Login", "Account");
 
+            if (!ModelState.IsValid)
+                return View(model);
 
-            if (userId == null)
-                return Unauthorized("Please log in");
+            var client = _factory.CreateClient("RaceDayApi");
+            client.DefaultRequestHeaders.Add("Cookie", HttpContext.Session.GetString("ApiCookie"));
 
-            if (role != "Participant")
-                return StatusCode(StatusCodes.Status403Forbidden, "Participant only");
+            // Call your API endpoint: POST /api/enrolments/{enrolmentId}/result
+            var response = await client.PostAsJsonAsync($"api/enrolments/{model.EnrolmentId}/result", new
+            {
+                finishTime = model.FinishTime,
+                position = model.Position
+            });
 
-            // Get this participant's results, with the events category
-            var results = (from r in _context.Results
-                           join en in _context.Enrolments on r.EnrolmentId equals en.EnrolmentId
-                           join c in _context.Categories on en.CategoryId equals c.CategoryId
-                           join e in _context.Events on c.EventId equals e.EventId
-                           where en.ParticipantId == userId.Value
-                           select new
-                           
-                           {
-                           
-                               r.ResultId,
-                               r.FinishTime,
-                               r.Position,                                     
-                               c.CategoryName,
-                               e.EventId,
-                               e.EventName,
-                               e.EventDate
-                              
-                           }).ToList();
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                HttpContext.Session.Clear();
+                return RedirectToAction("Login", "Account");
+            }
 
+            if (!response.IsSuccessStatusCode)
+            {
+                ModelState.AddModelError("", await response.Content.ReadAsStringAsync());
+                return View(model);
+            }
 
-            return Ok(results);
+            TempData["Success"] = "Result saved successfully!";
+
+            // Redirect back to the Organiser's Enrolments page for this event
+            return RedirectToAction("OrganiserIndex", "Enrolments", new { eventId = model.EventId });
         }
     }
 }
