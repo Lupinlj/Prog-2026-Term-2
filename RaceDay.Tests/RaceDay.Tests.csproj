@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-  <ProjectReference Include="..\RaceDay.csproj" />
+    <ProjectReference Include="..\RaceDay\RaceDay.csproj" />
   </ItemGroup>
 
   <ItemGroup>

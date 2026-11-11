@@ -19,9 +19,5 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "ApiSettings": {
-      "BaseUrl":  "http://localhost:7160/"
-    }
-
   }
 }

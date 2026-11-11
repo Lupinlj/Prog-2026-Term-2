@@ -1,0 +1,48 @@
+﻿@model List<RaceDay.Web.Models.EventViewModel>
+@{
+    ViewData["Title"] = "Organiser Dashboard";
+}
+
+<h2 class="mb-4">Organiser Dashboard</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white p-3 shadow-sm">
+            <h5>Total Events Created</h5>
+            <h2 class="display-5">@Model.Count</h2>
+        </div>
+    </div>
+</div>
+
+<h3 class="mb-3">Your Upcoming Events</h3>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">You haven't created any events yet. Go to "My Events" to create one.</div>
+}
+else
+{
+    <table class="table table-hover shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>Event Name</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model.Where(x => x.EventDate >= DateTime.Today).OrderBy(x => x.EventDate))
+            {
+                <tr>
+                    <td>@e.EventName</td>
+                    <td>@e.EventDate.ToString("dd MMM yyyy")</td>
+                    <td>@e.EventLocation</td>
+                    <td>
+                        <a asp-controller="Events" asp-action="Edit" asp-route-id="@e.EventId" class="btn btn-sm btn-outline-primary">Edit Event</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

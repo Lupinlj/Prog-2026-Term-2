@@ -1,0 +1,47 @@
+﻿@model RaceDay.Web.Models.EnrolmentsPageViewModel
+@{
+    ViewData["Title"] = "Event Enrolments";
+}
+
+<h2>Enrolments</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (!Model.Enrolments.Any())
+{
+    <p>No participants have enrolled in this event yet.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Participant Name</th>
+                <th>Email</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Actions</th> <!-- Added for Results entry -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model.Enrolments)
+            {
+                <tr>
+                    <td>@e.ParticipantName</td>
+                    <td>@e.ParticipantEmail</td>
+                    <td>@e.CategoryName</td>
+                    <td><span class="badge bg-success">Confirmed</span></td>
+                    <td>
+                        <!-- This links to the Results controller we are about to build -->
+                        <a asp-controller="Results" asp-action="Create" asp-route-enrolmentId="@e.EnrolmentId" class="btn btn-sm btn-primary">Enter Result</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-controller="Events" asp-action="Index" class="btn btn-secondary mt-3">Back to My Events</a>

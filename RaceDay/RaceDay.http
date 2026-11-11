@@ -1,0 +1,77 @@
+@host = http://localhost:5002
+
+### 1. register organiser
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Org One",
+  "email": "org1@test.com",
+  "password": "Test123!",
+  "role": "Organiser"
+}
+
+### 2. lOGIN
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "org1@test.com",
+  "password": "Test123!",
+  "role": "Organiser"
+}
+
+### 3. check session
+POST {{host}}/api/auth/status
+
+### 4. create event
+POST {{host}}/api/events
+Content-Type: application/json
+
+{
+  "eventName": "Test 10km",
+  "eventDescription": "test event",
+  "eventDate": "2026-12-01T08:00:00",
+  "eventLocation": "Cape Town",
+  "distance": 10,
+  "eventType": "Run"
+}
+
+### 5. list events
+GET {{host}}/api/events
+
+### 6. update event
+PUT {{host}}/api/events/1
+Content-Type: application/json
+
+{
+  "eventName": "Test 21km",
+  "eventDescription": "updated",
+  "eventDate": "2026-12-01T08:00:00",
+  "eventLocation": "Cape Town",
+  "distance": 21,
+  "eventType": "Run"
+}
+
+### 7. list categories for event 1
+GET {{host}}/api/events/1/categories
+
+###8. create category
+POST {{host}}/api/events/1/categories
+Content-Type: application/json
+
+{
+ "categoryName": "10km"
+}
+
+
+### 9. list categories again
+GET {{host}}/api/events/1/categories
+
+### 10. category on an event that doenn't exist (expect 404)
+POST {{host}}/api/events/999/categories
+Content-Type: application/json
+
+{
+  "categoryName": "5km"
+}

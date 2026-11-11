@@ -1,0 +1,41 @@
+﻿@model List<RaceDay.Web.Models.ParticipantResultViewModel>
+@{
+    ViewData["Title"] = "My Results";
+}
+
+<h2 class="mb-4">My Race History</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">You don't have any recorded race results yet.</div>
+}
+else
+{
+    <table class="table table-hover shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>Event Name</th>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Finish Time</th>
+                <th>Finishing Position</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model.OrderByDescending(x => x.EventDate))
+            {
+                <tr>
+                    <td class="fw-bold text-primary">EventName</td>
+                    <td>@r.EventDate.ToString("dd MMM yyyy")</td>
+                    <td>@r.CategoryName</td>
+                    <td>@r.FinishTime.ToString("HH:mm:ss")</td>
+                    <td>
+                        <span class="badge bg-secondary fs-6">
+                            Position: @r.Position
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,50 @@
+﻿@model List<RaceDay.Web.Models.EventViewModel>
+@{
+    ViewData["Title"] = "My Events";
+}
+
+<h2>My Events</h2>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+<a asp-action="Create" class="btn btn-primary mb-3">Create event</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Distance</th>
+            <th>Date</th>
+            <th>Location</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(e.ImageUrl))
+                    {
+                        <img src="@e.ImageUrl" style="height: 40px; width: 40px; object-fit: cover; border-radius: 5px; margin-right: 10px;" />
+                    }
+                    <span class="fw-bold">@e.EventName</span>
+                </td>
+                <td>@e.EventType</td>
+                <td>@e.Distance</td>
+                <td>@e.EventDate.ToString("dd MMM yyyy")</td>
+                <td>@e.EventLocation</td>
+                <td>
+                    <a asp-controller="Categories" asp-action="Index" asp-route-eventId="@e.EventId">Categories</a> |
+                    <a asp-action="Edit" asp-route-id="@e.EventId">Edit</a> |
+                    <form asp-action="Delete" asp-route-id="@e.EventId" method="post" class="d-inline"
+                          onsubmit="return confirm('Delete this event?');">
+                        <button type="submit" class="btn btn-link text-danger p-0" style="vertical-align: baseline;">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
