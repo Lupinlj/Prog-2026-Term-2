@@ -26,3 +26,23 @@ Users register and log in with email and password. Passwords are hashed with BCr
 
 **Steps**
 1. Clone the repo:
+   `git clone https://github.com/Lupinlj/Prog-2026-Term-2.git`
+   `cd Prog-2026-Term-2`
+2. Open `RaceDay/appsettings.json` and set:
+   - The SQL Server connection string for your machine.
+   - The `AzureStorage:ConnectionString` for your Azure Blob container (named `event-images`).
+3. Create the database (run from the API project folder):
+   `dotnet ef database update`
+4. In Visual Studio, right-click the Solution -> **Configure Startup Projects** -> Select **Multiple startup projects** -> Set both `RaceDay` (API) and `RaceDay.Web` (MVC) to **Start**.
+5. Press `F5` to run. Swagger will open for the API, and the browser will open for the MVC app.
+
+## 🐳 How to Run with Docker
+
+The MVC application is containerized using Docker. To build and run the application, use the following commands from the root directory:
+
+```bash
+# Build the Docker image
+docker build -t raceday-web -f RaceDay.Web/Dockerfile .
+
+# Run the container
+docker run -d -p 8080:80 --name raceday-app raceday-web
