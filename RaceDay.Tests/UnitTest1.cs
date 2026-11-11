@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RaceDay.Controllers;
 using RaceDay.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 
 namespace RaceDay.Tests
@@ -23,7 +24,8 @@ namespace RaceDay.Tests
         {
             // Arrange: fresh fake database, controller with an EMPTY session (nobody logged in)
             var context = CreateContext();
-            var controller = new EventsController(context);
+            var config = new ConfigurationBuilder().Build();
+            var controller = new EventsController(context,config);
             controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext { Session = new TestSessions() } 
@@ -47,7 +49,8 @@ namespace RaceDay.Tests
             sessions.SetInt32("UserId", 1);
             sessions.SetString("Role", "Organiser");
 
-            var controller = new EventsController(context);
+            var config = new ConfigurationBuilder().Build();
+            var controller = new EventsController(context,config);
             controller.ControllerContext = new ControllerContext
             {
 

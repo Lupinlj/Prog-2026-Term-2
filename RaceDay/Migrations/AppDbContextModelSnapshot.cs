@@ -98,6 +98,10 @@ namespace RaceDay.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("OrganiserId")
                         .HasColumnType("int");
 

@@ -1,31 +1,100 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    background-color: #f4f6f9; /* Very light grey */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #ff5722; /* Changed focus ring to orange */
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+    color: var(--bs-secondary-color);
+    text-align: end;
 }
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+    text-align: start;
+}
+
+/* --- RaceDay Energetic Theme --- */
+
+:root {
+    --raceday-dark: #1a1e24; /* Dark charcoal */
+    --raceday-primary: #ff5722; /* Energetic Orange */
+    --raceday-secondary: #00bcd4; /* Bright Cyan */
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--raceday-dark) !important;
+    border-bottom: 4px solid var(--raceday-primary) !important;
+}
+
+.navbar-brand, .nav-link {
+    color: white !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+    .nav-link:hover {
+        color: var(--raceday-primary) !important;
+    }
+
+/* Primary Buttons (Orange) */
+.btn-primary {
+    background-color: var(--raceday-primary);
+    border-color: var(--raceday-primary);
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+    .btn-primary:hover {
+        background-color: #e64a19;
+        border-color: #e64a19;
+    }
+
+/* Cards (Sporty look) */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+    .card:hover {
+        transform: translateY(-5px); /* Little bounce effect on hover */
+    }
+
+.card-header {
+    background-color: var(--raceday-dark);
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* Tables */
+.table-dark {
+    background-color: var(--raceday-dark) !important;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--raceday-dark) !important;
+    color: #a0a0a0 !important;
+    border-top: 4px solid var(--raceday-primary) !important;
 }

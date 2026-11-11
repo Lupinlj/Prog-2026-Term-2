@@ -4,6 +4,7 @@ using RaceDay.Data;
 using RaceDay.DTO;
 using RaceDay.Models;
 using System.Xml.Serialization;
+using Microsoft.Extensions.Configuration;
 
 namespace RaceDay.Tests
 {
@@ -91,7 +92,8 @@ namespace RaceDay.Tests
         public void CreateEvent_AsOrganiser_SaveEvent()
         {
             var ctx = TestHelper1.CreateContext();
-            var c = new EventsController(ctx); TestHelper1.SetUser(c, 1, "Organiser");
+            var config = new ConfigurationBuilder().Build();
+            var c = new EventsController(ctx, config);TestHelper1.SetUser(c, 1, "Organiser");
 
             c.CreateEvent(NewEventDto());
             Assert.Single(ctx.Events);
@@ -102,7 +104,8 @@ namespace RaceDay.Tests
         {
             var ctx = TestHelper1.CreateContext();
             var ev = AddEvent(ctx, 1);
-            var c = new EventsController(ctx); TestHelper1.SetUser(c, 1, "Organiser");
+            var config = new ConfigurationBuilder().Build();
+            var c = new EventsController(ctx, config); ; TestHelper1.SetUser(c, 1, "Organiser");
 
             c.UpdateEvent(ev.EventId, NewEventDto());
             Assert.Equal("New", ctx.Events.Single().EventName);
@@ -113,7 +116,8 @@ namespace RaceDay.Tests
         {
             var ctx = TestHelper1.CreateContext();
             var ev = AddEvent(ctx, 1);
-            var c = new EventsController(ctx); TestHelper1.SetUser(c, 1, "Organiser");
+            var config = new ConfigurationBuilder().Build();
+            var c = new EventsController(ctx, config); ; TestHelper1.SetUser(c, 1, "Organiser");
 
             c.DeleteEvent(ev.EventId);
             Assert.Empty(ctx.Events);
@@ -123,7 +127,8 @@ namespace RaceDay.Tests
         [Fact]
         public void GetEvents_NotLoggedIn_ReturnsUnauthorized()
         {
-            var c = new EventsController(TestHelper1.CreateContext()); TestHelper1.SetUser(c);
+            var config = new ConfigurationBuilder().Build();
+            var c = new EventsController(TestHelper1.CreateContext(), config); TestHelper1.SetUser(c);
             Assert.IsType<UnauthorizedObjectResult>(c.GetEvents());
         }
 
@@ -132,7 +137,8 @@ namespace RaceDay.Tests
         public void CreateEvent_AsParticipant_ReturnsForbidden()
         {
             var ctx = TestHelper1.CreateContext();
-            var c = new EventsController(ctx); TestHelper1.SetUser(c, 1, "Participant");
+            var config = new ConfigurationBuilder().Build();
+            var c = new EventsController(ctx, config); TestHelper1.SetUser(c, 1, "Participant");
             var result = c.CreateEvent(NewEventDto());
             Assert.Equal(403, Assert.IsType<ObjectResult>(result).StatusCode);
             Assert.Empty(ctx.Events);
